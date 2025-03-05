@@ -331,7 +331,7 @@ def logout():
 @app.route("/postphishing")
 # @user_login_required
 def postphishing():
-    return render_template("postphishing.html")
+    return render_template("PostPhishing.html")
 
 # PCAP Upload Route with Debug Logging and Analysis
 @app.route('/upload-pcap', methods=['POST'])

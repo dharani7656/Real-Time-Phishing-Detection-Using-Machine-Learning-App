@@ -151,7 +151,7 @@ capture_traffic('eth0', 100, 'network_traffic.pcap')
             const formData = new FormData();
             formData.append('pcap', file);
 
-            fetch('http://127.0.0.1:5000/upload-pcap', {
+            fetch('https://ml-based-phishing-detection.onrender.com/upload-pcap', {
                 method: 'POST',
                 body: formData
             })
