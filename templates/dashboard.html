@@ -307,14 +307,21 @@
             return `
                 <div class="email-card">
                     <div class="email-content">
-                        <h4>📧 ${email.subject || "No Subject"}</h4>
-                        <p><strong>From:</strong> ${email.from || "Unknown"}</p>
-                        <p><strong>Date:</strong> ${email.date || "Unknown Date"}</p>
-                        <p><strong>Status:</strong> <span id="status-${email.message_id}" class="${statusClass}">${email.status || 'Pending'}</span></p>
-                    </div>
+                    <h4>📧 ${email.subject || "No Subject"}</h4>
+                    <p><strong>From:</strong> ${email.from || "Unknown"}</p>
+                    <p><strong>Date:</strong> ${email.date || "Unknown Date"}</p>
+                    <p class="email-body">${email.body ? email.body.substring(0, 150) + "..." : "No body available"}</p>
+                    <p><strong>Status:</strong> <span id="status-${email.message_id}" class="${statusClass}">${email.status || 'Pending'}</span></p>
+                </div>
+                <div class="email-actions">
                     <button class="read-more-btn" onclick="openModal('${email.message_id}')">Read More</button>
+                    <button class="analyze-btn" onclick="analyzeEmail('${email.message_id}', \`${email.body.replace(/`/g, '\\`')}\`)">Analyze</button>
+                    
                 </div>`;
+               
         }
+       
+        
 
         function openModal(messageId) {
             const email = emails.find(e => e.message_id === messageId);
