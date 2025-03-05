@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Phishing Detection Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@lottiefiles/lottie-player@1.5.5"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #2d2a4a;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .header {
+            background: #1a1a40;
+            color: #fff;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .main-content {
+            background: #3e3b5b;
+            border-radius: 12px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .email-card {
+            background: #4a4768;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .email-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .email-content {
+            max-width: 80%;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #3e3b5b;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 700px;
+            color: #fff;
+            overflow-y: auto;
+        }
+
+        .status-safe {
+            color: green;
+            font-weight: bold;
+        }
+
+        .status-phishing {
+            color: red;
+            font-weight: bold;
+        }
+
+        .status-pending {
+            color: gray;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="header">
+        <h1><i class="fas fa-envelope"></i> Email Dashboard</h1>
+    </header>
+
+    <div class="max-w-7xl mx-auto p-6">
+        <main class="main-content p-6">
+            <h2><i class="fas fa-inbox"></i> Recent Emails</h2>
+            <button onclick="fetchEmails()" class="btn-primary text-white px-4 py-2 rounded-md shadow mb-6 bg-blue-500 hover:bg-blue-700">
+                <i class="fas fa-sync"></i> Refresh Emails
+            </button>
+
+            <div id="email-list" class="space-y-6">
+                <!-- Email list will be populated here -->
+            </div>
+        </main>
+    </div>
+
+    <footer class="footer">
+        <p>© 2025 Email Dashboard. All rights reserved.</p>
+    </footer>
+
+    <div id="emailModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h2 id="modalSubject">Subject</h2>
+            <p id="modalFrom">From:</p>
+            <p id="modalDate">Date:</p>
+            <p id="modalBody" style="white-space: pre-wrap; max-height: 300px; overflow-y: auto;">Body</p>
+        </div>
+    </div>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+
+    <script>
+        const socket = io();
+
+        socket.on('new_email', (email) => {
+            alert(`📧 New Email from: ${email.from}`);
+            fetchEmails();
+        });
+
+        socket.on('phishing_alert', (alert) => {
+            alert(`🚨 Phishing Detected!\nFrom: ${alert.from}\nSubject: ${alert.subject}`);
+            fetchEmails();
+        });
+
+        let emails = [];
+
+        async function fetchEmails() {
+            try {
+                const response = await fetch("http://127.0.0.1:5000/fetch-emails");
+                emails = await response.json();
+                displayEmails(emails);
+            } catch (error) {
+                console.error("Error fetching emails:", error);
+            }
+        }
+
+        function displayEmails(emails) {
+            const emailList = document.getElementById("email-list");
+            emailList.innerHTML = emails.length ? emails.map(createEmailCard).join('') : "<p>No emails found.</p>";
+        }
+
+        function createEmailCard(email) {
+            const statusClass = getStatusClass(email.status);
+            return `
+                <div class="email-card">
+                    <div class="email-content">
+                        <h4>📧 ${email.subject || "No Subject"}</h4>
+                        <p><strong>From:</strong> ${email.from || "Unknown"}</p>
+                        <p><strong>Date:</strong> ${email.date || "Unknown Date"}</p>
+                        <p><strong>Status:</strong> <span id="status-${email.message_id}" class="${statusClass}">${email.status || 'Pending'}</span></p>
+                    </div>
+                    <button class="read-more-btn" onclick="openModal('${email.message_id}')">Read More</button>
+                </div>`;
+        }
+
+        function openModal(messageId) {
+            const email = emails.find(e => e.message_id === messageId);
+            if (!email) return;
+
+            document.getElementById("modalSubject").innerText = email.subject || "No Subject";
+            document.getElementById("modalFrom").innerText = `From: ${email.from}`;
+            document.getElementById("modalDate").innerText = `Date: ${email.date}`;
+            document.getElementById("modalBody").innerText = email.body || "No content available";
+
+            document.getElementById("emailModal").style.display = "flex";
+        }
+
+        function closeModal() {
+            document.getElementById("emailModal").style.display = "none";
+        }
+
+        function analyzeEmail(messageId, emailText) {
+            const statusElement = document.getElementById(`status-${messageId}`);
+            statusElement.innerText = "Analyzing...";
+            statusElement.className = "status-pending";
+
+            fetch("http://127.0.0.1:5000/analyze-email", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    message_id: messageId,
+                    text: emailText,
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("✅ Analysis result:", data);
+                const resultText = data.prediction === "phishing" ? "Phishing" : "Safe";
+                const resultClass = data.prediction === "phishing" ? "status-phishing" : "status-safe";
+
+                statusElement.innerText = resultText;
+                statusElement.className = resultClass;
+            })
+            .catch(error => {
+                console.error("❌ Error analyzing email:", error);
+                statusElement.innerText = "Error";
+                statusElement.className = "status-pending";
+            });
+        }
+        
+
+
+
+        function getStatusClass(status) {
+            switch (status) {
+                case "safe":
+                    return "status-safe";
+                case "phishing":
+                    return "status-phishing";
+                default:
+                    return "status-pending";
+            }
+        }
+
+        
+
+        fetchEmails();
+
+    </script> 
+</body>
+</html>

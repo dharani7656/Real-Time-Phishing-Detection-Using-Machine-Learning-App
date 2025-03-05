@@ -1,0 +1,417 @@
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Phishing Detection Technology
+  </title>
+  <script src="https://cdn.tailwindcss.com">
+  </script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&amp;family=Georgia:wght@400;700&amp;display=swap" rel="stylesheet"/>
+  <meta content="Advanced phishing detection and analysis services using cutting-edge machine learning models to protect your business from cyber threats." name="description"/>
+  <meta content="Phishing Detection Technology" property="og:title"/>
+  <meta content="Learn about our advanced phishing detection technology and how it can protect your business from cyber threats." property="og:description"/>
+  <meta content="https://storage.googleapis.com/a1aa/image/QxrgNWnOPtDjVb1YaxLFw2CHbKYYhvYvUzU9xKI2nXk.jpg" property="og:image"/>
+  <style>
+   body {
+            font-family: 'Georgia', serif;
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+        .fade-in {
+            animation: fadeIn 2s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+  </style>
+ </head>
+ <body class="bg-[#2E1A47] text-white">
+  <!-- Navbar -->
+  <header class="sticky top-0 z-50 bg-[#1F1235] shadow-lg">
+   <nav class="flex justify-between items-center p-6">
+    <div aria-label="Logo" class="text-2xl font-bold">
+     Logo
+    </div>
+    <ul class="hidden md:flex space-x-8">
+     <li>
+      <a aria-label="Home Page" class="hover:underline" href="#">
+       Home Page
+      </a>
+     </li>
+     <li>
+      <a aria-label="About Us" class="hover:underline" href="#">
+       About Us
+      </a>
+     </li>
+     <li>
+      <a aria-label="Services" class="hover:underline" href="#">
+       Services
+      </a>
+     </li>
+     <li class="relative group">
+      <a aria-label="Resources" class="hover:underline" href="#">
+       Resources
+       <i aria-hidden="true" class="fas fa-chevron-down">
+       </i>
+      </a>
+      <ul class="absolute hidden group-hover:block bg-white text-black py-2 shadow-lg rounded-lg">
+       <li>
+        <a class="block px-4 py-2 hover:bg-gray-200" href="#">
+         Resource 1
+        </a>
+       </li>
+       <li>
+        <a class="block px-4 py-2 hover:bg-gray-200" href="#">
+         Resource 2
+        </a>
+       </li>
+      </ul>
+     </li>
+    </ul>
+    <div class="space-x-4 hidden md:block">
+     <button aria-label="Join" class="bg-transparent border border-white py-2 px-4 rounded-full hover:bg-white hover:text-[#2E1A47]">
+      Join
+     </button>
+     <button aria-label="Learn" class="bg-[#6B4A9B] py-2 px-4 rounded-full hover:bg-[#5A3D82]">
+      Learn
+     </button>
+    </div>
+    <div class="md:hidden">
+     <button class="text-white focus:outline-none" id="mobile-menu-button">
+      <i class="fas fa-bars">
+      </i>
+     </button>
+    </div>
+   </nav>
+   <div class="hidden md:hidden bg-[#1F1235] p-4" id="mobile-menu">
+    <ul class="space-y-4">
+     <li>
+      <a aria-label="Home Page" class="block hover:underline" href="#">
+       Home Page
+      </a>
+     </li>
+     <li>
+      <a aria-label="About Us" class="block hover:underline" href="#">
+       About Us
+      </a>
+     </li>
+     <li>
+      <a aria-label="Services" class="block hover:underline" href="#">
+       Services
+      </a>
+     </li>
+     <li>
+      <a aria-label="Resources" class="block hover:underline" href="#">
+       Resources
+      </a>
+     </li>
+     <li>
+      <button aria-label="Join" class="block w-full bg-transparent border border-white py-2 px-4 rounded-full hover:bg-white hover:text-[#2E1A47]">
+       Join
+      </button>
+     </li>
+     <li>
+      <button aria-label="Learn" class="block w-full bg-[#6B4A9B] py-2 px-4 rounded-full hover:bg-[#5A3D82]">
+       Learn
+      </button>
+     </li>
+    </ul>
+   </div>
+  </header>
+  <!-- Hero Section -->
+  <main>
+   <section class="relative flex flex-col lg:flex-row items-center justify-between px-6 lg:px-24 py-12 lg:py-24 bg-gradient-to-r from-[#2E1A47] to-[#1F1235] fade-in">
+    <div class="lg:w-1/2 mb-12 lg:mb-0">
+     <h1 class="text-5xl lg:text-6xl font-bold mb-6">
+      Protecting You from Phishing Threats
+     </h1>
+     <p class="text-lg mb-6">
+      We specialize in advanced phishing detection using cutting-edge machine learning models. Our services include comprehensive post-phishing analysis and training to empower you against future threats.
+     </p>
+     <div class="space-x-4">
+      <button aria-label="Learn More" class="bg-[#6B4A9B] py-3 px-6 rounded-full hover:bg-[#5A3D82] transition transform hover:scale-105">
+       Learn More
+      </button>
+      <button aria-label="Sign Up" class="bg-transparent border border-white py-3 px-6 rounded-full hover:bg-white hover:text-[#2E1A47] transition transform hover:scale-105">
+       Sign Up
+      </button>
+     </div>
+    </div>
+    <div class="lg:w-1/2">
+     <img alt="Two people working together on a laptop" class="rounded-lg shadow-lg" height="400" loading="lazy" src="https://storage.googleapis.com/a1aa/image/QxrgNWnOPtDjVb1YaxLFw2CHbKYYhvYvUzU9xKI2nXk.jpg" width="600"/>
+    </div>
+   </section>
+   <!-- Business Protection Section -->
+   <section class="flex flex-col md:flex-row items-center justify-center min-h-screen p-4 bg-[#1F1235] fade-in">
+    <div class="md:w-1/2 p-4">
+     <h2 class="text-4xl md:text-5xl font-bold mb-4">
+      Protect Your Business with Advanced Phishing Detection and Analysis Services
+     </h2>
+     <p class="text-lg md:text-xl">
+      Our phishing detection services utilize cutting-edge machine learning to identify threats before they impact your organization. Additionally, our post-phishing analysis helps you understand and mitigate risks, ensuring your team is well-prepared against future attacks.
+     </p>
+    </div>
+    <div class="md:w-1/2 p-4">
+     <img alt="Person looking stressed" class="rounded-lg" height="400" loading="lazy" src="https://storage.googleapis.com/a1aa/image/7wijFCzDuQHCxOX1Sp44oRNskcJ7Knnr6ktGcOjuo3Q.jpg" width="600"/>
+    </div>
+   </section>
+   <!-- Features Section -->
+   <section class="container mx-auto px-4 py-16 fade-in">
+    <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-12">
+     Understanding Our Advanced
+     <br/>
+     Machine Learning Phishing
+     <br/>
+     Detection Technology
+    </h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+     <div class="text-center bg-[#1F1235] p-6 rounded-lg shadow-lg">
+      <div class="mb-4">
+       <i aria-hidden="true" class="fas fa-cube text-4xl">
+       </i>
+      </div>
+      <h3 class="text-xl font-bold mb-4">
+       Uncovering the Steps in Our Post-Phishing Analysis Process
+      </h3>
+      <p class="mb-4">
+       Our machine learning model identifies phishing attempts by analyzing patterns and anomalies.
+      </p>
+      <a class="text-white font-bold" href="#">
+       Learn More
+       <i aria-hidden="true" class="fas fa-arrow-right">
+       </i>
+      </a>
+     </div>
+     <div class="text-center bg-[#1F1235] p-6 rounded-lg shadow-lg">
+      <div class="mb-4">
+       <i aria-hidden="true" class="fas fa-cube text-4xl">
+       </i>
+      </div>
+      <h3 class="text-xl font-bold mb-4">
+       The Importance of Post-Phishing Analysis for Enhanced Security
+      </h3>
+      <p class="mb-4">
+       Post-phishing analysis helps organizations understand the attack and strengthen defenses.
+      </p>
+      <a class="text-white font-bold" href="#">
+       Sign Up
+       <i aria-hidden="true" class="fas fa-arrow-right">
+       </i>
+      </a>
+     </div>
+     <div class="text-center bg-[#1F1235] p-6 rounded-lg shadow-lg">
+      <div class="mb-4">
+       <i aria-hidden="true" class="fas fa-cube text-4xl">
+       </i>
+      </div>
+      <h3 class="text-xl font-bold mb-4">
+       Real-Time Threat Detection and Response
+      </h3>
+      <p class="mb-4">
+       Our system provides real-time alerts and responses to phishing threats, ensuring immediate action.
+      </p>
+      <a class="text-white font-bold" href="#">
+       Get Started
+       <i aria-hidden="true" class="fas fa-arrow-right">
+       </i>
+      </a>
+     </div>
+    </div>
+   </section>
+   <!-- New Features Section -->
+   <section class="bg-[#2D1B4A] text-white font-['Roboto']">
+    <div class="container mx-auto px-4 py-16">
+     <h1 class="text-3xl md:text-4xl font-bold mb-8">
+      Discover the cutting-edge features of our phishing detection service.
+     </h1>
+     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div class="bg-white text-black p-6 rounded-lg">
+       <img alt="Two people discussing at an outdoor cafe" class="w-full h-48 object-cover rounded-lg mb-4" height="200" src="https://storage.googleapis.com/a1aa/image/UzibUwqHfCy-nH-2MMEySCn5FmRbrsi9j9VFtosT47w.jpg" width="400"/>
+       <h2 class="text-xl font-bold mb-2">
+        Comprehensive post-phishing analysis to safeguard your digital presence.
+       </h2>
+       <p class="mb-4">
+        Our advanced machine learning model identifies phishing attempts in real-time.
+       </p>
+       <a class="text-blue-500 font-bold" href="#">
+        Learn
+        <i class="fas fa-arrow-right">
+        </i>
+       </a>
+      </div>
+      <div class="bg-white text-black p-6 rounded-lg">
+       <img alt="Group of people in a discussion" class="w-full h-48 object-cover rounded-lg mb-4" height="200" src="https://storage.googleapis.com/a1aa/image/iIB4gLn02pdVhaOP6_PXCzUNDEu6fMB4W99wv1kbyd4.jpg" width="400"/>
+       <h2 class="text-xl font-bold mb-2">
+        Empower yourself with our expert training on phishing awareness.
+       </h2>
+       <p class="mb-4">
+        Stay informed and protect your organization with our educational resources.
+       </p>
+       <a class="text-blue-500 font-bold" href="#">
+        Train
+        <i class="fas fa-arrow-right">
+        </i>
+       </a>
+      </div>
+      <div class="bg-white text-black p-6 rounded-lg">
+       <img alt="People analyzing data in a modern office" class="w-full h-48 object-cover rounded-lg mb-4" height="200" src="https://storage.googleapis.com/a1aa/image/aOSZz0I81jYIrtZ4ek00nV5ZS18Q7pNBzsapkhTmpoU.jpg" width="400"/>
+       <h2 class="text-xl font-bold mb-2">
+        Receive detailed insights from our thorough post-phishing analysis.
+       </h2>
+       <p class="mb-4">
+        Understand the impact of phishing attacks and enhance your defenses.
+       </p>
+       <a class="text-blue-500 font-bold" href="#">
+        Analyze
+        <i class="fas fa-arrow-right">
+        </i>
+       </a>
+      </div>
+     </div>
+    </div>
+   </section>
+   <!-- Testimonials Section -->
+   <section class="py-16 bg-gradient-to-r from-[#2E1A47] to-[#1F1235] fade-in">
+    <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-12">
+     What Our Clients Say
+    </h2>
+    <div class="container mx-auto px-4">
+     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <!-- Testimonial 1 -->
+      <div class="bg-[#1F1235] p-6 rounded-lg shadow-lg text-center">
+       <img alt="Portrait of John Doe, CEO" class="rounded-full w-24 h-24 mb-4 mx-auto" height="100" src="https://storage.googleapis.com/a1aa/image/vrFp354SK3QKNhT5_qUquVMfDYiHXZPcbwM_jL3btLQ.jpg" width="100"/>
+       <p class="italic text-xl mb-4">
+        "This service has been a game-changer for our company."
+       </p>
+       <p class="font-bold text-lg">
+        - John Doe, CEO
+       </p>
+      </div>
+      <!-- Testimonial 2 -->
+      <div class="bg-[#1F1235] p-6 rounded-lg shadow-lg text-center">
+       <img alt="Portrait of Jane Smith, COO" class="rounded-full w-24 h-24 mb-4 mx-auto" height="100" src="https://storage.googleapis.com/a1aa/image/on2TyzZnHDua4K2l8LTs1P0rlHWxNHCSoM2aRMfP-bs.jpg" width="100"/>
+       <p class="italic text-xl mb-4">
+        "Highly recommend this service for its efficiency."
+       </p>
+       <p class="font-bold text-lg">
+        - Jane Smith, COO
+       </p>
+      </div>
+      <!-- Testimonial 3 -->
+      <div class="bg-[#1F1235] p-6 rounded-lg shadow-lg text-center">
+       <img alt="Portrait of Michael Brown, CTO" class="rounded-full w-24 h-24 mb-4 mx-auto" height="100" src="https://storage.googleapis.com/a1aa/image/amitAVcaHxZ_YVZLaDEsRP0VB3fzGhQf9PL871U7Vc8.jpg" width="100"/>
+       <p class="italic text-xl mb-4">
+        "Exceptional service and support. Our team feels much safer now."
+       </p>
+       <p class="font-bold text-lg">
+        - Michael Brown, CTO
+       </p>
+      </div>
+     </div>
+    </div>
+   </section>
+  </main>
+  <!-- Footer Section -->
+  <footer class="bg-[#1F1235] text-white py-8">
+   <div class="container mx-auto px-4">
+    <div class="flex flex-col md:flex-row justify-between">
+     <div>
+      <h3 class="text-lg font-bold mb-4">
+       Company
+      </h3>
+      <ul>
+       <li>
+        <a aria-label="About Us" class="hover:underline" href="#">
+         About Us
+        </a>
+       </li>
+       <li>
+        <a aria-label="Careers" class="hover:underline" href="#">
+         Careers
+        </a>
+       </li>
+       <li>
+        <a aria-label="Contact" class="hover:underline" href="#">
+         Contact
+        </a>
+       </li>
+      </ul>
+     </div>
+     <div>
+      <h3 class="text-lg font-bold mb-4">
+       Resources
+      </h3>
+      <ul>
+       <li>
+        <a aria-label="Blog" class="hover:underline" href="#">
+         Blog
+        </a>
+       </li>
+       <li>
+        <a aria-label="Help Center" class="hover:underline" href="#">
+         Help Center
+        </a>
+       </li>
+       <li>
+        <a aria-label="Privacy Policy" class="hover:underline" href="#">
+         Privacy Policy
+        </a>
+       </li>
+      </ul>
+     </div>
+     <div>
+      <h3 class="text-lg font-bold mb-4">
+       Follow Us
+      </h3>
+      <ul class="flex space-x-4">
+       <li>
+        <a aria-label="Facebook" class="hover:underline" href="#">
+         <i class="fab fa-facebook-f">
+         </i>
+        </a>
+       </li>
+       <li>
+        <a aria-label="Twitter" class="hover:underline" href="#">
+         <i class="fab fa-twitter">
+         </i>
+        </a>
+       </li>
+       <li>
+        <a aria-label="LinkedIn" class="hover:underline" href="#">
+         <i class="fab fa-linkedin-in">
+         </i>
+        </a>
+       </li>
+       <li>
+        <a aria-label="Instagram" class="hover:underline" href="#">
+         <i class="fab fa-instagram">
+         </i>
+        </a>
+       </li>
+      </ul>
+     </div>
+    </div>
+    <div class="mt-8 text-center">
+     <p>
+      © 2025 Phishing Detection Technology. All rights reserved.
+     </p>
+    </div>
+   </div>
+  </footer>
+  <!-- Back to Top Button -->
+  <button aria-label="Back to Top" class="fixed bottom-4 right-4 bg-[#6B4A9B] text-white p-3 rounded-full shadow-lg hover:bg-[#5A3D82] focus:outline-none" id="back-to-top">
+   <i class="fas fa-arrow-up">
+   </i>
+  </button>
+  <!-- Swiper JS -->
+  <script src="https://unpkg.com/swiper/swiper-bundle.min.js">
+  </script>
+  <link href="https://unpkg.com/swiper/swiper-bundle.min.css" rel="stylesheet"/>
+  <script>
+  </script>
+ </body>
+</html>
