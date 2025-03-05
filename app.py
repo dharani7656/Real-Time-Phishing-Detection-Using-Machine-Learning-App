@@ -1,5 +1,6 @@
 # app.py
 from functools import wraps
+import traceback
 from scapy.all import rdpcap
 import os
 import uuid
@@ -57,7 +58,7 @@ SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 CREDENTIALS_PATH = '/etc/secrets/CREDENTIALS_JSON'
 
 
-socketio = SocketIO(app)
+
 
 # Initialize MongoDB
 client = MongoClient(os.getenv("MONGO_URI"))
@@ -95,6 +96,7 @@ client = WebApplicationClient(GOOGLE_CLIENT_ID)
 
 
 
+socketio = SocketIO(app, async_mode="threading", cors_allowed_origins="*")
 
 
 
@@ -214,21 +216,24 @@ def background_email_fetch():
                 email_text = f"{email.get('subject', '')} {email.get('body', '')}"
                 result = analyze_email_content(email_text)
 
-                # Update email status in the database
+                # Update email status in MongoDB
                 emails_collection.update_one(
                     {"message_id": email['message_id']},
                     {"$set": {"status": result}}
                 )
 
-                # Add phishing_status to email for the frontend
+                # Add phishing status for frontend display
                 email['phishing_status'] = "Phishing Email" if result == "phishing" else "Safe Email"
 
-                # Real-time push to frontend
-                socketio.emit("new_email", email)
+                # Emit new email event to the frontend
+                try:
+                    with app.app_context():
+                        socketio.emit("new_email", email)
+                except Exception as emit_error:
+                    logging.error(f"Socket.IO emit failed: {emit_error}")
 
-                # Send alert if phishing is detected
+                # Send phishing alert if needed
                 if result == "phishing":
-                    # Retrieve user email from the database using message_id
                     email_record = emails_collection.find_one({"message_id": email['message_id']})
                     user_email = email_record.get('user_email') if email_record else None
 
@@ -242,7 +247,8 @@ def background_email_fetch():
 
         logging.info("Email fetch and analysis complete.")
     except Exception as e:
-        logging.error(f"Error in background job: {e}")
+        logging.error(f"Error in background job: {e}\n{traceback.format_exc()}")
+
 
 
 def get_gmail_service():
@@ -647,10 +653,13 @@ def handle_request_stats():
 
 if __name__ == '__main__':
     # 🔹 Start Background Job for Automatic Email Fetching Every 60 Seconds
+    # Initialize and start the scheduler
     scheduler = BackgroundScheduler()
-    scheduler.add_job(background_email_fetch, "interval", seconds=60)
-    scheduler.start()
-    logging.info("Phishing detection system started.")
+
+    if not scheduler.running:
+        scheduler.add_job(background_email_fetch, "interval", seconds=60)
+        scheduler.start()
+        logging.info("Phishing detection system started.")
 
     print("🚀 Flask App is running with Real-time Email Fetching and Socket.IO")
 

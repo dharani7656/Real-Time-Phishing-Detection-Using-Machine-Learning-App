@@ -1,6 +1,4 @@
-<!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,6 +25,37 @@
             align-items: center;
         }
 
+        .header h1 {
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+        }
+
+        .header h1 i {
+            margin-right: 10px;
+        }
+
+        .header nav ul {
+            list-style: none;
+            display: flex;
+            gap: 20px;
+        }
+
+        .header nav ul li {
+            display: inline;
+        }
+
+        .header nav ul li a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+
+        .header nav ul li a:hover {
+            color: #ffeb3b;
+        }
+
         .main-content {
             background: #3e3b5b;
             border-radius: 12px;
@@ -35,15 +64,26 @@
             margin-top: 20px;
         }
 
+        .main-content h2 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .main-content h2 i {
+            margin-right: 10px;
+        }
+
         .email-card {
             background: #4a4768;
             border-radius: 12px;
             padding: 20px;
             margin-bottom: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: transform 0.3s, box-shadow 0.3s;
         }
 
         .email-card:hover {
@@ -53,6 +93,40 @@
 
         .email-content {
             max-width: 80%;
+        }
+
+        .email-content p {
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .email-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .email-actions button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s, transform 0.3s;
+        }
+
+        .email-actions button:hover {
+            transform: scale(1.05);
+        }
+
+        .read-more-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .analyze-btn {
+            background-color: #007BFF;
+            color: white;
         }
 
         .modal {
@@ -65,15 +139,47 @@
             background: rgba(0, 0, 0, 0.6);
             justify-content: center;
             align-items: center;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
 
         .modal-content {
             background-color: #3e3b5b;
             padding: 20px;
             border-radius: 8px;
+            width: 90%;
             max-width: 700px;
+            position: relative;
+            animation: slideIn 0.5s;
             color: #fff;
-            overflow-y: auto;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-30px);
+            }
+
+            to {
+                transform: translateY(0);
+            }
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+            font-size: 20px;
+            color: #fff;
         }
 
         .status-safe {
@@ -90,6 +196,36 @@
             color: gray;
             font-weight: bold;
         }
+
+        .footer {
+            background: #1a1a40;
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 12px;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .header nav ul {
+                display: none;
+            }
+
+            .email-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .email-content {
+                max-width: 100%;
+            }
+
+            .email-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
     </style>
 </head>
 
@@ -97,16 +233,24 @@
 
     <header class="header">
         <h1><i class="fas fa-envelope"></i> Email Dashboard</h1>
+        <nav>
+            <!-- <ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul> -->
+        </nav>
     </header>
 
     <div class="max-w-7xl mx-auto p-6">
-        <main class="main-content p-6">
+        <main class="main-content p-6 ">
             <h2><i class="fas fa-inbox"></i> Recent Emails</h2>
             <button onclick="fetchEmails()" class="btn-primary text-white px-4 py-2 rounded-md shadow mb-6 bg-blue-500 hover:bg-blue-700">
                 <i class="fas fa-sync"></i> Refresh Emails
             </button>
-
-            <div id="email-list" class="space-y-6">
+            
+            <div id="email-list" class="space-y-6 ">
                 <!-- Email list will be populated here -->
             </div>
         </main>
@@ -129,7 +273,7 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
 
     <script>
-        const socket = io();
+        const socket = io.connect('https://ml-based-phishing-detection.onrender.com');
 
         socket.on('new_email', (email) => {
             alert(`📧 New Email from: ${email.from}`);
