@@ -514,8 +514,7 @@ def fetch_emails():
     emails = list(emails_collection.find({}, {"_id": 0}).sort("date", -1))
     return jsonify(emails)
 
-from flask import request, jsonify, session
-import os
+
 
 @app.route("/analyze-email", methods=["POST"])
 def analyze_email():
