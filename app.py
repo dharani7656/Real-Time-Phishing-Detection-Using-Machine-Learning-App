@@ -1,4 +1,6 @@
 # app.py
+import eventlet
+eventlet.monkey_patch()
 from functools import wraps
 import traceback
 from scapy.all import rdpcap
@@ -208,46 +210,47 @@ def send_email(recipient_email, pdf_path):
 def background_email_fetch():
     """Background job to fetch new emails and analyze for phishing."""
     try:
+        # Fetch and store new emails
         new_emails = fetch_and_store_emails()
 
         if new_emails:
-            for email in new_emails:
-                email_text = f"{email.get('subject', '')} {email.get('body', '')}"
-                result = analyze_email_content(email_text)
+            with app.app_context():
+                for email in new_emails:
+                    email_text = f"{email.get('subject', '')} {email.get('body', '')}"
+                    result = analyze_email_content(email_text)
 
-                # Update email status in MongoDB
-                emails_collection.update_one(
-                    {"message_id": email['message_id']},
-                    {"$set": {"status": result}}
-                )
+                    # Update email status in MongoDB
+                    emails_collection.update_one(
+                        {"message_id": email['message_id']},
+                        {"$set": {"status": result}}
+                    )
 
-                # Add phishing status for frontend display
-                email['phishing_status'] = "Phishing Email" if result == "phishing" else "Safe Email"
+                    # Add phishing status for frontend display
+                    email['phishing_status'] = "Phishing Email" if result == "phishing" else "Safe Email"
 
-                # Emit new email event to the frontend
-                try:
-                    with app.app_context():
-                       socketio.emit("new_email", email)
+                    # Emit new email event to the frontend
+                    try:
+                        socketio.emit("new_email", email)
+                        logging.info(f"New email emitted: {email['message_id']}")
+                    except Exception as emit_error:
+                        logging.error(f"Socket.IO emit failed: {emit_error}")
 
-                except Exception as emit_error:
-                    logging.error(f"Socket.IO emit failed: {emit_error}")
+                    # Send phishing alert if needed
+                    if result == "phishing":
+                        email_record = emails_collection.find_one({"message_id": email['message_id']})
+                        user_email = email_record.get('user_email') if email_record else None
 
-                # Send phishing alert if needed
-                if result == "phishing":
-                    email_record = emails_collection.find_one({"message_id": email['message_id']})
-                    user_email = email_record.get('user_email') if email_record else None
+                        if user_email:
+                            email_subject = email.get('subject', 'No Subject')
+                            email_from = email.get('from', 'Unknown Sender')
+                            logging.info(f"Sending phishing alert to: {user_email}")
+                            send_phishing_alert_email(user_email, email_subject, email_from)
+                        else:
+                            logging.warning("User email not found for phishing alert.")
 
-                    if user_email:
-                        email_subject = email.get('subject', 'No Subject')
-                        email_from = email.get('from', 'Unknown Sender')
-                        logging.info(f"Sending phishing alert to: {user_email}")
-                        send_phishing_alert_email(user_email, email_subject, email_from)
-                    else:
-                        logging.warning("User email not found for phishing alert.")
-
-        logging.info("Email fetch and analysis complete.")
+        logging.info("✅ Email fetch and analysis complete.")
     except Exception as e:
-        logging.error(f"Error in background job: {e}\n{traceback.format_exc()}")
+        logging.error(f"❌ Error in background job: {e}\n{traceback.format_exc()}")
 
 
 
