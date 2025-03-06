@@ -95,7 +95,7 @@ client = WebApplicationClient(GOOGLE_CLIENT_ID)
 
 
 
-socketio = SocketIO(app, async_mode="threading", cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="gevent", logger=True, engineio_logger=True)
 
 
 
