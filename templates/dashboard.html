@@ -272,13 +272,26 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
 
     <script>
-        const socket = io();
+        const socket = io("https://ml-based-phishing-detection.onrender.com");
+
+        socket.on("connect", () => {
+            console.log("✅ Connected to Socket.IO");
+        });
+        socket.on("connect_error", (error) => {
+            console.error("❌ Socket connection error:", error);
+        });
 
         // Listen for new emails
         socket.on('new_email', (email) => {
             alert(`📧 New Email from: ${email.from}`);
             location.reload(); // Refresh to update dashboard
         });
+        socket.on('new_email', (email) => {
+            alert(`📧 New Email from: ${email.from}`);
+            emails.unshift(email);  // Add to the top of the list
+            displayEmails(emails);  // Update dashboard
+        });
+
 
         // Listen for phishing alerts
         socket.on('phishing_alert', (alert) => {

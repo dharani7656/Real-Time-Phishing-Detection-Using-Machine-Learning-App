@@ -8,7 +8,6 @@ from flask import Flask, jsonify, render_template, request, redirect, url_for, s
 from pymongo import MongoClient
 from dotenv import load_dotenv
 import requests
-import socketio
 from werkzeug.utils import secure_filename
 from bson import ObjectId
 from dotenv import load_dotenv
@@ -228,7 +227,8 @@ def background_email_fetch():
                 # Emit new email event to the frontend
                 try:
                     with app.app_context():
-                        socketio.emit("new_email", email)
+                       socketio.emit("new_email", email)
+
                 except Exception as emit_error:
                     logging.error(f"Socket.IO emit failed: {emit_error}")
 
@@ -649,17 +649,18 @@ def handle_request_stats():
     except Exception as e:
         socketio.emit('update_stats_error', {'error': str(e)})
 
-
-
-if __name__ == '__main__':
-    # 🔹 Start Background Job for Automatic Email Fetching Every 60 Seconds
+# 🔹 Start Background Job for Automatic Email Fetching Every 60 Seconds
     # Initialize and start the scheduler
     scheduler = BackgroundScheduler()
 
     if not scheduler.running:
         scheduler.add_job(background_email_fetch, "interval", seconds=60)
         scheduler.start()
-        logging.info("Phishing detection system started.")
+        logging.info("Phishing detection system started.")        
+
+
+
+if __name__ == '__main__':
 
     print("🚀 Flask App is running with Real-time Email Fetching and Socket.IO")
 
