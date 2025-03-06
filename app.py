@@ -214,54 +214,40 @@ def send_email(recipient_email, pdf_path):
 
 
 
+
 def background_email_fetch():
-    """Continuously fetch and analyze emails in the background."""
-    def run():
-        with app.app_context():
+    """Background task to fetch and analyze emails continuously."""
+    with app.app_context():
+        while True:
             try:
-                while True:
-                    # Fetch and analyze emails
-                    new_emails = fetch_and_store_emails()
-                    if new_emails:
-                        for email in new_emails:
-                            # Analyze email content
-                            email_text = f"{email.get('subject', '')} {email.get('body', '')}"
-                            result = analyze_email_content(email_text)
+                # Fetch new emails
+                new_emails = fetch_and_store_emails()
 
-                            # Update MongoDB with phishing status
-                            emails_collection.update_one(
-                                {"message_id": email['message_id']},
-                                {"$set": {"status": result}}
-                            )
+                if new_emails:
+                    for email in new_emails:
+                        # Analyze the email
+                        email_text = f"{email.get('subject', '')} {email.get('body', '')}"
+                        result = analyze_email_content(email_text)
 
-                            # Emit real-time updates via Socket.IO
-                            email['phishing_status'] = "Phishing Email" if result == "phishing" else "Safe Email"
-                            socketio.emit("new_email", email)
+                        # Update MongoDB status
+                        emails_collection.update_one(
+                            {"message_id": email['message_id']},
+                            {"$set": {"status": result}}
+                        )
 
-                            # Send alert if phishing is detected
-                            if result == "phishing" and email.get('user_email'):
-                                send_phishing_alert_email(
-                                    email['user_email'], email['subject'], email['from']
-                                )
+                        # Emit real-time updates to frontend
+                        email['phishing_status'] = "Phishing Email" if result == "phishing" else "Safe Email"
+                        socketio.emit("new_email", email)
 
-                    logging.info("✅ Background email fetch and analysis completed.")
-                    eventlet.sleep(60)  # Wait for 60 seconds before fetching again
+                        # Send alert if phishing detected
+                        if result == "phishing" and email.get('user_email'):
+                            send_phishing_alert_email(email['user_email'], email['subject'], email['from'])
+
+                logging.info("✅ Email fetch and analysis completed.")
+                eventlet.sleep(60)  # Fetch emails every 60 seconds
 
             except Exception as e:
                 logging.error(f"❌ Error in background task: {e}\n{traceback.format_exc()}")
-
-    # Start the background task as a daemon thread
-    Thread(target=run, daemon=True).start()
-
-def start_background_task():
-    """Initialize the background email fetch task."""
-    logging.info("🚀 Starting background email fetch task...")
-    background_email_fetch()
-
-# Gunicorn post-fork hook to start the background job after worker initialization
-def post_fork(server, worker):
-    start_background_task()
-
 def get_gmail_service():
     creds = None
 
@@ -661,19 +647,12 @@ def handle_request_stats():
         })
     except Exception as e:
         socketio.emit('update_stats_error', {'error': str(e)})
-
-# 🔹 Start Background Job for Automatic Email Fetching Every 60 Seconds
-    # Initialize and start the scheduler
-    scheduler = BackgroundScheduler()
-
-    if not scheduler.running:
-        scheduler.add_job(background_email_fetch, "interval", seconds=60)
-        scheduler.start()
-        logging.info("Phishing detection system started.")        
+    
 
 
 
 if __name__ == '__main__':
-    start_background_task()
+    # Start background task only once
+    socketio.start_background_task(background_email_fetch)
     # Ensure Flask binds to the correct port on Render
     socketio.run(app, host='0.0.0.0', port=int(os.environ.get('PORT', 10000)), debug=False)
