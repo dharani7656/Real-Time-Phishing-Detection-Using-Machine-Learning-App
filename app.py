@@ -1,4 +1,4 @@
-# app.py
+
 import eventlet
 eventlet.monkey_patch()
 from functools import wraps
@@ -42,6 +42,7 @@ from flask import request, jsonify, session, current_app
 from werkzeug.utils import secure_filename
 import logging
 from google_auth_oauthlib.flow import Flow
+from threading import Thread
 
 
 # Load environment variables
@@ -207,50 +208,38 @@ def send_email(recipient_email, pdf_path):
     server.sendmail(sender_email, recipient_email, text)
     server.quit()
 
+from threading import Thread
+
 def background_email_fetch():
-    """Background job to fetch new emails and analyze for phishing."""
-    try:
-        # Fetch and store new emails
-        new_emails = fetch_and_store_emails()
+    """Background task to fetch and analyze emails."""
+    def run():
+        with app.app_context():
+            try:
+                new_emails = fetch_and_store_emails()
+                if new_emails:
+                    for email in new_emails:
+                        email_text = f"{email.get('subject', '')} {email.get('body', '')}"
+                        result = analyze_email_content(email_text)
 
-        if new_emails:
-            with app.app_context():
-                for email in new_emails:
-                    email_text = f"{email.get('subject', '')} {email.get('body', '')}"
-                    result = analyze_email_content(email_text)
+                        emails_collection.update_one(
+                            {"message_id": email['message_id']},
+                            {"$set": {"status": result}}
+                        )
 
-                    # Update email status in MongoDB
-                    emails_collection.update_one(
-                        {"message_id": email['message_id']},
-                        {"$set": {"status": result}}
-                    )
-
-                    # Add phishing status for frontend display
-                    email['phishing_status'] = "Phishing Email" if result == "phishing" else "Safe Email"
-
-                    # Emit new email event to the frontend
-                    try:
+                        email['phishing_status'] = "Phishing Email" if result == "phishing" else "Safe Email"
                         socketio.emit("new_email", email)
-                        logging.info(f"New email emitted: {email['message_id']}")
-                    except Exception as emit_error:
-                        logging.error(f"Socket.IO emit failed: {emit_error}")
 
-                    # Send phishing alert if needed
-                    if result == "phishing":
-                        email_record = emails_collection.find_one({"message_id": email['message_id']})
-                        user_email = email_record.get('user_email') if email_record else None
+                        if result == "phishing":
+                            user_email = email.get('user_email')
+                            if user_email:
+                                send_phishing_alert_email(user_email, email['subject'], email['from'])
 
-                        if user_email:
-                            email_subject = email.get('subject', 'No Subject')
-                            email_from = email.get('from', 'Unknown Sender')
-                            logging.info(f"Sending phishing alert to: {user_email}")
-                            send_phishing_alert_email(user_email, email_subject, email_from)
-                        else:
-                            logging.warning("User email not found for phishing alert.")
+                logging.info("✅ Email fetch and analysis completed.")
+            except Exception as e:
+                logging.error(f"❌ Error in background job: {e}\n{traceback.format_exc()}")
 
-        logging.info("✅ Email fetch and analysis complete.")
-    except Exception as e:
-        logging.error(f"❌ Error in background job: {e}\n{traceback.format_exc()}")
+    # Run fetch operation in a background thread
+    Thread(target=run).start()
 
 
 
