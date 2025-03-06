@@ -272,9 +272,6 @@ def get_gmail_service():
 
     return None
 
-@app.before_first_request
-def start_background_task():
-    background_email_fetch()
 
 
 @app.route('/')
