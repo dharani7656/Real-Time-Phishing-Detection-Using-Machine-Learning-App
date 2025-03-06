@@ -269,51 +269,73 @@
             <p id="modalBody" style="white-space: pre-wrap; max-height: 300px; overflow-y: auto;">Body</p>
         </div>
     </div>
-
     <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
 
     <script>
-        const socket = io.connect('https://ml-based-phishing-detection.onrender.com');
+        const socket = io();
 
+        // Listen for new emails
         socket.on('new_email', (email) => {
             alert(`📧 New Email from: ${email.from}`);
-            fetchEmails();
+            location.reload(); // Refresh to update dashboard
         });
 
+        // Listen for phishing alerts
         socket.on('phishing_alert', (alert) => {
             alert(`🚨 Phishing Detected!\nFrom: ${alert.from}\nSubject: ${alert.subject}`);
-            fetchEmails();
+            location.reload(); // Refresh the dashboard
         });
-
+        
         let emails = [];
 
+
         function fetchEmails() {
-            try {
-                const response =  fetch("https://ml-based-phishing-detection.onrender.com/fetch-emails");
-                emails =  response.json();
-                displayEmails(emails);
-            } catch (error) {
-                console.error("Error fetching emails:", error);
-            }
+            fetch("https://ml-based-phishing-detection.onrender.com/fetch-emails")
+                .then(response => response.json())
+                .then(data => {
+                    emails = data;
+                    displayEmails(data);
+                })
+                .catch(error => console.error("Error fetching emails:", error));
         }
 
         function displayEmails(emails) {
             const emailList = document.getElementById("email-list");
-            emailList.innerHTML = emails.length ? emails.map(createEmailCard).join('') : "<p>No emails found.</p>";
+            emailList.innerHTML = "";
+
+            if (emails.length === 0) {
+                emailList.innerHTML = "<p>No emails found.</p>";
+                return;
+            }
+
+            emails.forEach(email => appendEmailToList(email));
         }
 
-        function createEmailCard(email) {
+        function appendEmailToList(email) {
+            const emailList = document.getElementById("email-list");
+
+            const emailItem = document.createElement("div");
+            emailItem.classList.add("email-card");
+
             const statusClass = getStatusClass(email.status);
-            return `
-                <div class="email-card">
-                    <div class="email-content">
-                        <h4>📧 ${email.subject || "No Subject"}</h4>
-                        <p><strong>From:</strong> ${email.from || "Unknown"}</p>
-                        <p><strong>Date:</strong> ${email.date || "Unknown Date"}</p>
-                        <p><strong>Status:</strong> <span id="status-${email.message_id}" class="${statusClass}">${email.status || 'Pending'}</span></p>
-                    </div>
+
+            emailItem.innerHTML = `
+                <div class="email-content">
+                    <h4>📧 ${email.subject || "No Subject"}</h4>
+                    <p><strong>From:</strong> ${email.from || "Unknown"}</p>
+                    <p><strong>Date:</strong> ${email.date || "Unknown Date"}</p>
+                    <p class="email-body">${email.body ? email.body.substring(0, 150) + "..." : "No body available"}</p>
+                    <p><strong>Status:</strong> <span id="status-${email.message_id}" class="${statusClass}">${email.status || 'Pending'}</span></p>
+                </div>
+                <div class="email-actions">
                     <button class="read-more-btn" onclick="openModal('${email.message_id}')">Read More</button>
-                </div>`;
+                    <button class="analyze-btn" onclick="analyzeEmail('${email.message_id}', \`${email.body.replace(/`/g, '\\`')}\`)">Analyze</button>
+                    
+                </div>
+            `;
+
+
+            emailList.appendChild(emailItem);
         }
 
         function openModal(messageId) {
@@ -384,3 +406,4 @@
     </script> 
 </body>
 </html>
+
