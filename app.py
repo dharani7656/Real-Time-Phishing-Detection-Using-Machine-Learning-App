@@ -212,43 +212,55 @@ def send_email(recipient_email, pdf_path):
     server.quit()
 
 
+
+
 def background_email_fetch():
-    """Background task to fetch and analyze emails."""
+    """Continuously fetch and analyze emails in the background."""
     def run():
-        with current_app.app_context():
+        with app.app_context():
             try:
-                # Fetch new emails
-                new_emails = fetch_and_store_emails()
-                if new_emails:
-                    for email in new_emails:
-                        # Analyze the email
-                        email_text = f"{email.get('subject', '')} {email.get('body', '')}"
-                        result = analyze_email_content(email_text)
+                while True:
+                    # Fetch and analyze emails
+                    new_emails = fetch_and_store_emails()
+                    if new_emails:
+                        for email in new_emails:
+                            # Analyze email content
+                            email_text = f"{email.get('subject', '')} {email.get('body', '')}"
+                            result = analyze_email_content(email_text)
 
-                        # Update MongoDB status
-                        emails_collection.update_one(
-                            {"message_id": email['message_id']},
-                            {"$set": {"status": result}}
-                        )
+                            # Update MongoDB with phishing status
+                            emails_collection.update_one(
+                                {"message_id": email['message_id']},
+                                {"$set": {"status": result}}
+                            )
 
-                        # Add phishing status and emit to frontend
-                        email['phishing_status'] = "Phishing Email" if result == "phishing" else "Safe Email"
-                        socketio.emit("new_email", email)
+                            # Emit real-time updates via Socket.IO
+                            email['phishing_status'] = "Phishing Email" if result == "phishing" else "Safe Email"
+                            socketio.emit("new_email", email)
 
-                        # Send alert for phishing emails
-                        if result == "phishing":
-                            user_email = email.get('user_email')
-                            if user_email:
-                                send_phishing_alert_email(user_email, email['subject'], email['from'])
+                            # Send alert if phishing is detected
+                            if result == "phishing" and email.get('user_email'):
+                                send_phishing_alert_email(
+                                    email['user_email'], email['subject'], email['from']
+                                )
 
-                logging.info("✅ Background email fetch and analysis completed.")
+                    logging.info("✅ Background email fetch and analysis completed.")
+                    eventlet.sleep(60)  # Wait for 60 seconds before fetching again
+
             except Exception as e:
                 logging.error(f"❌ Error in background task: {e}\n{traceback.format_exc()}")
 
-    # Start the background thread
+    # Start the background task as a daemon thread
     Thread(target=run, daemon=True).start()
 
+def start_background_task():
+    """Initialize the background email fetch task."""
+    logging.info("🚀 Starting background email fetch task...")
+    background_email_fetch()
 
+# Gunicorn post-fork hook to start the background job after worker initialization
+def post_fork(server, worker):
+    start_background_task()
 
 def get_gmail_service():
     creds = None
@@ -662,9 +674,6 @@ def handle_request_stats():
 
 
 if __name__ == '__main__':
-    
-
-    print("🚀 Flask App is running with Real-time Email Fetching and Socket.IO")
-
+    start_background_task()
     # Ensure Flask binds to the correct port on Render
     socketio.run(app, host='0.0.0.0', port=int(os.environ.get('PORT', 10000)), debug=False)

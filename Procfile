@@ -1,2 +1,1 @@
-web: gunicorn -k eventlet -w 1 app:app
-
+web: gunicorn -k eventlet app:app --post-fork app:post_fork
