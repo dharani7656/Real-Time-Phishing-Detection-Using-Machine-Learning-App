@@ -1,8 +1,10 @@
 
 import eventlet
 eventlet.monkey_patch()
+
+
+
 from functools import wraps
-import traceback
 from scapy.all import rdpcap
 import os
 import uuid
@@ -13,7 +15,7 @@ import requests
 from werkzeug.utils import secure_filename
 from bson import ObjectId
 from dotenv import load_dotenv
-from flask import Flask, render_template, request, send_file, jsonify, redirect, flash, session, url_for
+from flask import Flask, render_template, request, send_file, jsonify, redirect, flash, session, url_for, current_app
 from flask_socketio import SocketIO
 from pymongo import MongoClient
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -43,6 +45,7 @@ from werkzeug.utils import secure_filename
 import logging
 from google_auth_oauthlib.flow import Flow
 from threading import Thread
+import traceback
 
 
 # Load environment variables
@@ -208,38 +211,42 @@ def send_email(recipient_email, pdf_path):
     server.sendmail(sender_email, recipient_email, text)
     server.quit()
 
-from threading import Thread
 
 def background_email_fetch():
     """Background task to fetch and analyze emails."""
     def run():
-        with app.app_context():
+        with current_app.app_context():
             try:
+                # Fetch new emails
                 new_emails = fetch_and_store_emails()
                 if new_emails:
                     for email in new_emails:
+                        # Analyze the email
                         email_text = f"{email.get('subject', '')} {email.get('body', '')}"
                         result = analyze_email_content(email_text)
 
+                        # Update MongoDB status
                         emails_collection.update_one(
                             {"message_id": email['message_id']},
                             {"$set": {"status": result}}
                         )
 
+                        # Add phishing status and emit to frontend
                         email['phishing_status'] = "Phishing Email" if result == "phishing" else "Safe Email"
                         socketio.emit("new_email", email)
 
+                        # Send alert for phishing emails
                         if result == "phishing":
                             user_email = email.get('user_email')
                             if user_email:
                                 send_phishing_alert_email(user_email, email['subject'], email['from'])
 
-                logging.info("✅ Email fetch and analysis completed.")
+                logging.info("✅ Background email fetch and analysis completed.")
             except Exception as e:
-                logging.error(f"❌ Error in background job: {e}\n{traceback.format_exc()}")
+                logging.error(f"❌ Error in background task: {e}\n{traceback.format_exc()}")
 
-    # Run fetch operation in a background thread
-    Thread(target=run).start()
+    # Start the background thread
+    Thread(target=run, daemon=True).start()
 
 
 
@@ -267,7 +274,9 @@ def get_gmail_service():
 
     return None
 
-
+@app.before_first_request
+def start_background_task():
+    background_email_fetch()
 
 
 @app.route('/')
