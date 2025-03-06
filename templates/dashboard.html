@@ -272,46 +272,66 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
 
     <script>
-       const socket = io("https://ml-based-phishing-detection.onrender.com", {
-        transports: ["websocket"],  // Force WebSocket
-       })
+
+        // Establish a Socket.IO connection to the backend (forcing WebSocket transport)
+        const socket = io("https://ml-based-phishing-detection.onrender.com", {
+            transports: ["websocket"],  // Force WebSocket for better real-time performance
+        });
+
+        // Global array to store email data
+        let emails = [];
+
+        // ✅ Handle successful socket connection
         socket.on("connect", () => {
             console.log("✅ Connected to Socket.IO");
         });
+
+        // ❌ Handle connection errors
         socket.on("connect_error", (error) => {
             console.error("❌ Socket connection error:", error);
         });
 
-        // Listen for new emails
-        socket.on('new_email', (email) => {
-            alert(`📧 New Email from: ${email.from}`);
-            location.reload(); // Refresh to update dashboard
-        });
-        socket.on('new_email', (email) => {
-            alert(`📧 New Email from: ${email.from}`);
-            emails.unshift(email);  // Add to the top of the list
-            displayEmails(emails);  // Update dashboard
+        // 🔌 Handle socket disconnection
+        socket.on("disconnect", () => {
+            console.warn("🔌 Disconnected from Socket.IO");
         });
 
+        // 📧 Listen for new emails and update the dashboard dynamically
+        socket.on("new_email", (email) => {
+            console.log("📧 New Email Received:", email);
+            alert(`📧 New Email from: ${email.from}`);
 
-        // Listen for phishing alerts
-        socket.on('phishing_alert', (alert) => {
+            // Add new email to the top of the list and update the dashboard without reloading
+            emails.unshift(email);
+            displayEmails(emails);
+        });
+
+        // 🚨 Listen for phishing alerts
+        socket.on("phishing_alert", (alert) => {
+            console.warn("🚨 Phishing Alert:", alert);
             alert(`🚨 Phishing Detected!\nFrom: ${alert.from}\nSubject: ${alert.subject}`);
-            location.reload(); // Refresh the dashboard
+
+            // Refresh the email list to reflect the latest status
+            fetchEmails();
         });
-        
-        let emails = [];
 
+        // Fetch and display emails from the backend using async/await
+        async function fetchEmails() {
+            try {
+                const response = await fetch("https://ml-based-phishing-detection.onrender.com/fetch-emails");
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch emails: ${response.statusText}`);
+                }
 
-        function fetchEmails() {
-            fetch("https://ml-based-phishing-detection.onrender.com/fetch-emails")
-                .then(response => response.json())
-                .then(data => {
-                    emails = data;
-                    displayEmails(data);
-                })
-                .catch(error => console.error("Error fetching emails:", error));
+                const data = await response.json();
+                emails = data; // Store the fetched emails globally
+                displayEmails(data); // Update dashboard
+                console.log("📧 Emails fetched successfully:", data);
+            } catch (error) {
+                console.error("❌ Error fetching emails:", error);
+            }
         }
+
 
         function displayEmails(emails) {
             const emailList = document.getElementById("email-list");

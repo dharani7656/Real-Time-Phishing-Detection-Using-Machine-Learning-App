@@ -95,7 +95,7 @@ client = WebApplicationClient(GOOGLE_CLIENT_ID)
 
 
 
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode="gevent", logger=True, engineio_logger=True)
+socketio = SocketIO(app, async_mode="threading", cors_allowed_origins="*")
 
 
 
@@ -661,6 +661,7 @@ def handle_request_stats():
 
 
 if __name__ == '__main__':
+    
 
     print("🚀 Flask App is running with Real-time Email Fetching and Socket.IO")
 
