@@ -272,10 +272,12 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
 
     <script>
-
-        // Establish a Socket.IO connection to the backend (forcing WebSocket transport)
+        
         const socket = io("https://ml-based-phishing-detection.onrender.com", {
             transports: ["websocket"],  // Force WebSocket for better real-time performance
+            reconnection: true,         // Enable automatic reconnection
+            reconnectionAttempts: 5,    // Retry up to 5 times
+            reconnectionDelay: 3000,    // 3-second delay between retries
         });
 
         // Global array to store email data
@@ -284,6 +286,7 @@
         // ✅ Handle successful socket connection
         socket.on("connect", () => {
             console.log("✅ Connected to Socket.IO");
+            fetchEmails(); // Ensure the dashboard is up-to-date on connection
         });
 
         // ❌ Handle connection errors
@@ -291,27 +294,42 @@
             console.error("❌ Socket connection error:", error);
         });
 
+        // 🔄 Handle reconnection attempts
+        socket.on("reconnect_attempt", (attempt) => {
+            console.warn(`🔄 Reconnection attempt #${attempt}`);
+        });
+
         // 🔌 Handle socket disconnection
-        socket.on("disconnect", () => {
-            console.warn("🔌 Disconnected from Socket.IO");
+        socket.on("disconnect", (reason) => {
+            console.warn("🔌 Disconnected from Socket.IO:", reason);
         });
 
         // 📧 Listen for new emails and update the dashboard dynamically
         socket.on("new_email", (email) => {
             console.log("📧 New Email Received:", email);
-            alert(`📧 New Email from: ${email.from}`);
 
-            // Add new email to the top of the list and update the dashboard without reloading
+            // Throttle alerts to prevent spam (1 alert every 5 seconds max)
+            if (!window.lastEmailAlert || Date.now() - window.lastEmailAlert > 5000) {
+                alert(`📧 New Email from: ${email.from}`);
+                window.lastEmailAlert = Date.now();
+            }
+
+            // Add the new email to the top of the list
             emails.unshift(email);
-            displayEmails(emails);
+            updateEmail(email); // Update UI incrementally
         });
 
         // 🚨 Listen for phishing alerts
         socket.on("phishing_alert", (alert) => {
             console.warn("🚨 Phishing Alert:", alert);
-            alert(`🚨 Phishing Detected!\nFrom: ${alert.from}\nSubject: ${alert.subject}`);
 
-            // Refresh the email list to reflect the latest status
+            // Highlight phishing alert with an alert box (once every 5 seconds max)
+            if (!window.lastPhishingAlert || Date.now() - window.lastPhishingAlert > 5000) {
+                alert(`🚨 Phishing Detected!\nFrom: ${alert.from}\nSubject: ${alert.subject}`);
+                window.lastPhishingAlert = Date.now();
+            }
+
+            // Refresh emails to reflect the latest status (if needed)
             fetchEmails();
         });
 
